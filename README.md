@@ -3,16 +3,17 @@
 
 ### api: //axios 
 - 保存题目：POST /api/addQuestions
-{id,content,answer,subject}
+
+上传样例：{content,answer,tag}
 - 获取题目列表：GET /api/fetchQuestions
 
 - 获取题目详情：GET /api/questions/:id
 
 - 编辑题目: POST /api/editQuestions
-{id,content,answer,subject}
+上传样例：{id,content,answer,tag}
 
 - AI打分：POST /api/questions/score
-{id,content,answer,subject} 
+上传样例：{id,content,answer,tag} 
 
 ## 前端：
 题目列表、题目详情、添加编辑题目、做题（AI打分）
