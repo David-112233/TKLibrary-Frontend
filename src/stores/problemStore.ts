@@ -1,131 +1,120 @@
+import axios from 'axios'
 import { ref } from 'vue'
 
 export interface PhysicsProblem {
   id: string
-  title: string
   content: string
-  chapter: string
-  difficulty: 'easy' | 'medium' | 'hard'
-  source: string
-  tags: string[]
   answer: string
-  analysis: string
-  createdAt?: Date
-  updatedAt?: Date
+  tag: string
 }
 
-const STORAGE_KEY = 'physics-problems'
+export type CreateProblemPayload = Pick<PhysicsProblem, 'content' | 'answer' | 'tag'>
+export type UpdateProblemPayload = PhysicsProblem
+export interface ScoreRequest extends CreateProblemPayload {
+  id: string
+}
+export type ScoreResponse = Record<string, unknown>
 
-const mockProblems: PhysicsProblem[] = [
-  {
-    id: '1',
-    title: '牛顿第二定律应用',
-    content: '一个质量为2kg的物体，受到5N的水平拉力，在光滑水平面上运动，求物体的加速度。',
-    chapter: '牛顿运动定律',
-    difficulty: 'easy',
-    source: '2023年高考物理',
-    tags: ['牛顿定律', '力学', '计算题'],
-    answer: '2.5m/s²',
-    analysis: '根据牛顿第二定律 F=ma，代入数据得 a=F/m=5N/2kg=2.5m/s²。',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: '2',
-    title: '机械能守恒定律',
-    content: '一个质量为1kg的小球从20m高处自由下落，忽略空气阻力，求小球落地时的速度大小。',
-    chapter: '机械能守恒',
-    difficulty: 'medium',
-    source: '2022年模拟题',
-    tags: ['机械能', '自由落体', '计算题'],
-    answer: '20m/s',
-    analysis: '根据机械能守恒定律 mgh=1/2mv²，解得 v=√(2gh)=√(2×10×20)=20m/s。',
-    createdAt: new Date(),
-    updatedAt: new Date()
+// Axios instance for all problem-related requests
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json'
   }
-]
+})
 
-const loadProblemsFromStorage = (): PhysicsProblem[] => {
-  if (typeof window === 'undefined') {
-    return mockProblems
-  }
+const problems = ref<PhysicsProblem[]>([])
+const isFetching = ref(false)
+let isInitialized = false
 
+const fetchProblems = async () => {
+  isFetching.value = true
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      return parsed.map((problem: PhysicsProblem) => ({
-        ...problem,
-        createdAt: problem.createdAt ? new Date(problem.createdAt) : undefined,
-        updatedAt: problem.updatedAt ? new Date(problem.updatedAt) : undefined
-      }))
-    }
+    const { data } = await api.get<PhysicsProblem[]>('/fetchQuestions')
+    problems.value = data
+    isInitialized = true
+    return data
   } catch (error) {
-    console.error('加载数据失败:', error)
+    console.error('获取题目列表失败:', error)
+    throw error
+  } finally {
+    isFetching.value = false
   }
-
-  return mockProblems
 }
 
-const saveProblemsToStorage = (items: PhysicsProblem[]) => {
-  if (typeof window === 'undefined') {
+const fetchProblemDetail = async (id: string) => {
+  try {
+    const { data } = await api.get<PhysicsProblem>(`/questions/${id}`)
+    return data
+  } catch (error) {
+    console.error('获取题目详情失败:', error)
+    throw error
+  }
+}
+
+const addProblem = async (payload: CreateProblemPayload) => {
+  try {
+    const { data } = await api.post<PhysicsProblem>('/addQuestions', payload)
+    problems.value = [...problems.value, data]
+    return data
+  } catch (error) {
+    console.error('保存题目失败:', error)
+    throw error
+  }
+}
+
+const updateProblem = async (id: string, updates: Partial<CreateProblemPayload>) => {
+  try {
+    const current = getProblemById(id)
+    const payload: UpdateProblemPayload = {
+      id,
+      content: updates.content ?? current?.content ?? '',
+      answer: updates.answer ?? current?.answer ?? '',
+      tag: updates.tag ?? current?.tag ?? ''
+    }
+
+    const { data } = await api.post<PhysicsProblem>('/editQuestions', payload)
+    problems.value = problems.value.map(problem =>
+      problem.id === id ? data : problem
+    )
+    return data
+  } catch (error) {
+    console.error('编辑题目失败:', error)
+    throw error
+  }
+}
+
+const scoreProblem = async (payload: ScoreRequest) => {
+  try {
+    const { data } = await api.post<ScoreResponse>('/questions/score', payload)
+    return data
+  } catch (error) {
+    console.error('AI 打分失败:', error)
+    throw error
+  }
+}
+
+const getProblemById = (id: string) => problems.value.find(problem => problem.id === id)
+
+const ensureInitialized = () => {
+  if (isInitialized || isFetching.value || typeof window === 'undefined') {
     return
   }
-
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  } catch (error) {
-    console.error('保存数据失败:', error)
-  }
-}
-
-const problems = ref<PhysicsProblem[]>(loadProblemsFromStorage())
-
-const updateProblems = (next: PhysicsProblem[]) => {
-  problems.value = next
-  saveProblemsToStorage(next)
+  fetchProblems().catch(error => {
+    console.error('初始化题目列表失败:', error)
+  })
 }
 
 export const useProblemStore = () => {
-  const getProblemById = (id: string) => problems.value.find(problem => problem.id === id)
-
-  const addProblem = (problem: Omit<PhysicsProblem, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newProblem: PhysicsProblem = {
-      ...problem,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-
-    updateProblems([...problems.value, newProblem])
-    return newProblem.id
-  }
-
-  const updateProblem = (id: string, updates: Partial<PhysicsProblem>) => {
-    let hasChanged = false
-    const next = problems.value.map(problem => {
-      if (problem.id === id) {
-        hasChanged = true
-        return {
-          ...problem,
-          ...updates,
-          updatedAt: new Date()
-        }
-      }
-      return problem
-    })
-
-    if (hasChanged) {
-      updateProblems(next)
-    }
-
-    return hasChanged
-  }
+  ensureInitialized()
 
   return {
     problems,
+    fetchProblems,
+    fetchProblemDetail,
     addProblem,
     updateProblem,
+    scoreProblem,
     getProblemById
   }
 }
