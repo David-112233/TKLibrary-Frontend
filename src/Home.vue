@@ -3,28 +3,12 @@
 		<AppNavbar />
 		<div class="container">
 			<div class="filters">
-				<h2>筛选条件</h2>
-				<div class="filter-group">
-					<label>难度：</label>
-					<select v-model="selectedDifficulty">
-						<option value="all">全部</option>
-						<option value="easy">简单</option>
-						<option value="medium">中等</option>
-						<option value="hard">困难</option>
-					</select>
-				</div>
-				<div class="filter-group">
-					<label>章节：</label>
-					<select v-model="selectedChapter">
-						<option value="all">全部</option>
-						<option v-for="chapter in chapters" :key="chapter" :value="chapter">{{ chapter }}</option>
-					</select>
-				</div>
+				<h2>筛选与操作</h2>
 				<div class="filter-group">
 					<label>搜索：</label>
 					<input
 						type="text"
-						placeholder="输入关键词搜索"
+						placeholder="输入关键词搜索（内容或标签）"
 						v-model="searchKeyword"
 					/>
 				</div>
@@ -37,15 +21,11 @@
 					<ul>
 						<li v-for="problem in filteredProblems" :key="problem.id" class="problem-item">
 							<div class="problem-header">
-								<h3>{{ problem.title }}</h3>
-								<span :class="['difficulty', problem.difficulty]">
-									{{ getDifficultyText(problem.difficulty) }}
-								</span>
+								<h3>题目预览</h3>
 							</div>
-							<p class="problem-chapter">章节：{{ problem.chapter }}</p>
 							<p class="problem-content">{{ previewContent(problem.content) }}</p>
 							<div class="problem-tags">
-								<span v-for="tag in problem.tags" :key="tag" class="tag">{{ tag }}</span>
+								<span v-for="tag in (problem.tag || [])" :key="tag" class="tag">{{ tag }}</span>
 							</div>
 							<div class="problem-actions">
 								<button @click="navigateToDetail(problem.id)">查看详情</button>
@@ -69,43 +49,20 @@ import { useProblemStore } from './stores/problemStore'
 const router = useRouter()
 const { problems } = useProblemStore()
 
-const selectedDifficulty = ref<'all' | 'easy' | 'medium' | 'hard'>('all')
-const selectedChapter = ref<'all' | string>('all')
 const searchKeyword = ref('')
 
 const filteredProblems = computed(() => {
+	const keyword = searchKeyword.value.trim()
 	return problems.value.filter(problem => {
-		const matchesDifficulty =
-			selectedDifficulty.value === 'all' || problem.difficulty === selectedDifficulty.value
-		const matchesChapter =
-			selectedChapter.value === 'all' || problem.chapter === selectedChapter.value
-		const keyword = searchKeyword.value.trim()
-		const matchesKeyword =
-			keyword === '' ||
-			problem.title.includes(keyword) ||
-			problem.content.includes(keyword) ||
-			problem.tags.some(tag => tag.includes(keyword))
-
-		return matchesDifficulty && matchesChapter && matchesKeyword
+		if (!keyword) return true
+		const inContent = problem.content && problem.content.includes(keyword)
+		const inTag = Array.isArray(problem.tag) && problem.tag.some(tag => tag.includes(keyword))
+		return inContent || inTag
 	})
 })
 
-const chapters = computed(() => Array.from(new Set(problems.value.map(problem => problem.chapter))))
-
-const getDifficultyText = (difficulty: 'easy' | 'medium' | 'hard') => {
-	switch (difficulty) {
-		case 'easy':
-			return '简单'
-		case 'medium':
-			return '中等'
-		case 'hard':
-			return '困难'
-		default:
-			return difficulty
-	}
-}
-
-const previewContent = (content: string) => {
+const previewContent = (content?: string) => {
+	if (!content) return ''
 	return content.length > 100 ? `${content.slice(0, 100)}...` : content
 }
 

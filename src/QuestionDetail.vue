@@ -5,15 +5,12 @@
 			<div class="problem-detail">
 				<template v-if="problem">
 					<div class="problem-header">
-						<h1>{{ problem.title }}</h1>
-						<span :class="['difficulty', problem.difficulty]">{{ getDifficultyText(problem.difficulty) }}</span>
+						<h1>题目详情</h1>
 					</div>
 
 					<div class="problem-meta">
-						<p>章节：{{ problem.chapter }}</p>
-						<p>来源：{{ problem.source }}</p>
 						<div class="problem-tags">
-							<span v-for="tag in problem.tags" :key="tag" class="tag">{{ tag }}</span>
+							<span v-for="tag in (problem.tag || [])" :key="tag" class="tag">{{ tag }}</span>
 						</div>
 					</div>
 
@@ -27,10 +24,7 @@
 						<p>{{ problem.answer }}</p>
 					</div>
 
-					<div class="problem-analysis">
-						<h3>解析</h3>
-						<p>{{ problem.analysis }}</p>
-					</div>
+
 
 					<div class="problem-actions">
 						<button @click="goHome">返回列表</button>
@@ -63,18 +57,6 @@ const problem = computed(() => {
 	return problems.value.find(item => item.id === id)
 })
 
-const getDifficultyText = (difficulty: 'easy' | 'medium' | 'hard') => {
-	switch (difficulty) {
-		case 'easy':
-			return '简单'
-		case 'medium':
-			return '中等'
-		case 'hard':
-			return '困难'
-		default:
-			return difficulty
-	}
-}
 
 const goHome = () => {
 	router.push({ name: 'Home' })

@@ -179,33 +179,6 @@ body {
   color: #2c3e50;
 }
 
-.difficulty {
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.difficulty.easy {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.difficulty.medium {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.difficulty.hard {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.problem-chapter {
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
 
 .problem-content {
   color: #333;
@@ -292,8 +265,7 @@ body {
 }
 
 .problem-detail .problem-content,
-.problem-detail .problem-answer,
-.problem-detail .problem-analysis {
+.problem-detail .problem-answer {
   margin-bottom: 2rem;
 }
 

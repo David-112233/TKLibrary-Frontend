@@ -8,32 +8,8 @@
 				<template v-if="form">
 					<form @submit.prevent="handleSubmit">
 						<div class="form-group">
-							<label for="title">题目标题</label>
-							<input id="title" type="text" v-model="form.title" required />
-						</div>
-
-						<div class="form-group">
 							<label for="content">题目内容</label>
 							<textarea id="content" v-model="form.content" rows="6" required />
-						</div>
-
-						<div class="form-group">
-							<label for="chapter">所属章节</label>
-							<input id="chapter" type="text" v-model="form.chapter" required />
-						</div>
-
-						<div class="form-group">
-							<label for="difficulty">难度</label>
-							<select id="difficulty" v-model="form.difficulty">
-								<option value="easy">简单</option>
-								<option value="medium">中等</option>
-								<option value="hard">困难</option>
-							</select>
-						</div>
-
-						<div class="form-group">
-							<label for="source">题目来源</label>
-							<input id="source" type="text" v-model="form.source" />
 						</div>
 
 						<div class="form-group">
@@ -48,7 +24,7 @@
 								<button type="button" @click="handleAddTag">添加</button>
 							</div>
 							<div class="selected-tags">
-								<span v-for="tag in form.tags" :key="tag" class="tag">
+								<span v-for="tag in form.tag" :key="tag" class="tag">
 									{{ tag }}
 									<button type="button" @click="handleRemoveTag(tag)">×</button>
 								</span>
@@ -58,11 +34,6 @@
 						<div class="form-group">
 							<label for="answer">答案</label>
 							<input id="answer" type="text" v-model="form.answer" required />
-						</div>
-
-						<div class="form-group">
-							<label for="analysis">解析</label>
-							<textarea id="analysis" v-model="form.analysis" rows="6" required />
 						</div>
 
 						<div class="form-actions">
@@ -89,7 +60,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppNavbar from './components/AppNavbar.vue'
 import { useProblemStore, type PhysicsProblem } from './stores/problemStore'
 
-type ProblemFormState = Omit<PhysicsProblem, 'id' | 'createdAt' | 'updatedAt'>
+type ProblemFormState = Pick<PhysicsProblem, 'content' | 'answer' | 'tag'>
 
 const route = useRoute()
 const router = useRouter()
@@ -99,14 +70,9 @@ const form = ref<ProblemFormState | null>(null)
 const tagInput = ref('')
 
 const toFormState = (problem: PhysicsProblem): ProblemFormState => ({
-	title: problem.title,
 	content: problem.content,
-	chapter: problem.chapter,
-	difficulty: problem.difficulty,
-	source: problem.source,
-	tags: [...problem.tags],
-	answer: problem.answer,
-	analysis: problem.analysis
+	tag: Array.isArray((problem as any).tag) ? [...(problem as any).tag] : [],
+	answer: problem.answer
 })
 
 const loadForm = () => {
@@ -125,21 +91,17 @@ watch(
 )
 
 const handleAddTag = () => {
-	if (!form.value) {
-		return
-	}
+	if (!form.value) return
 	const candidate = tagInput.value.trim()
-	if (candidate && !form.value.tags.includes(candidate)) {
-		form.value.tags.push(candidate)
+	if (candidate && !form.value.tag.includes(candidate)) {
+		form.value.tag.push(candidate)
 	}
 	tagInput.value = ''
 }
 
 const handleRemoveTag = (tag: string) => {
-	if (!form.value) {
-		return
-	}
-	form.value.tags = form.value.tags.filter((item: string) => item !== tag)
+	if (!form.value) return
+	form.value.tag = form.value.tag.filter((item: string) => item !== tag)
 }
 
 const goHome = () => {
@@ -147,11 +109,9 @@ const goHome = () => {
 }
 
 const handleSubmit = () => {
-	if (!form.value) {
-		return
-	}
+	if (!form.value) return
 	const id = route.params.id as string
-	updateProblem(id, { ...form.value })
+	updateProblem(id, { content: form.value.content, answer: form.value.answer, tag: form.value.tag })
 	goHome()
 }
 </script>
