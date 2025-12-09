@@ -108,10 +108,10 @@ const goHome = () => {
 	router.push({ name: 'Home' })
 }
 
-const handleSubmit = () => {
-	if (!form.value) return
-	const id = route.params.id as string
-	updateProblem(id, { content: form.value.content, answer: form.value.answer, tag: form.value.tag })
-	goHome()
-}
+const handleSubmit = async () => {
+		if (!form.value) return
+		const id = route.params.id as string
+		await updateProblem(id, { content: form.value.content, answer: form.value.answer, tag: form.value.tag })
+		goHome()
+	}
 </script>

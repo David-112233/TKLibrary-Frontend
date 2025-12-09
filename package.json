@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/marked": "^5.0.2",
     "axios": "^1.13.2",
+    "marked": "^17.0.1",
     "vue": "^3.4.0",
     "vue-router": "^4.4.5"
   },

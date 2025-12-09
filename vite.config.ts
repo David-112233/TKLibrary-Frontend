@@ -6,7 +6,14 @@ export default defineConfig({
   plugins: [vue()],
   base: './',
   server: {
-    port: 5174
+    port: 5174,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
   },
   resolve: {
     alias: {

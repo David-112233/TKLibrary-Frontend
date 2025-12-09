@@ -19,9 +19,19 @@ const router = createRouter({
       component: () => import('../editQuestion.vue')
     },
     {
+      path: '/question/:id/solve',
+      name: 'SolveQuestion',
+      component: () => import('../solveQuestion.vue')
+    },
+    {
       path: '/add',
       name: 'AddQuestion',
       component: () => import('../addQuestion.vue')
+    },
+    {
+      path: '/ai-chat',
+      name: 'AIChat',
+      component: () => import('../aiChat.vue')
     }
   ]
 })

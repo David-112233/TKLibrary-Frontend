@@ -6,9 +6,10 @@ export interface PhysicsProblem {
   content: string
   answer: string
   tag: string[]
+  subject?: string
 }
 
-export type CreateProblemPayload = Pick<PhysicsProblem, 'content' | 'answer' | 'tag'>
+export type CreateProblemPayload = Pick<PhysicsProblem, 'content' | 'answer' | 'tag'> & { subject?: string }
 export type UpdateProblemPayload = PhysicsProblem
 export interface ScoreRequest extends CreateProblemPayload {
   id: string
@@ -70,9 +71,10 @@ const fetchProblems = async () => {
       return data
     }
 
-    // normalize tag to always be an array
+    // normalize tag to always be an array and id to always be a string
     const normalized = data.map((item: any) => ({
       ...item,
+      id: String(item.id),
       tag: Array.isArray(item.tag) ? item.tag : (typeof item.tag === 'string' ? item.tag.split(',').map((s: string) => s.trim()).filter(Boolean) : [])
     }))
     problems.value = normalized
@@ -90,6 +92,8 @@ const fetchProblemDetail = async (id: string) => {
   try {
     const { data } = await api.get<PhysicsProblem>(`/questions/${id}`)
     if (data) {
+      // Convert id to string and normalize tag to array
+      data.id = String((data as any).id)
       data.tag = Array.isArray((data as any).tag) ? (data as any).tag : (typeof (data as any).tag === 'string' ? (data as any).tag.split(',').map((s: string) => s.trim()).filter(Boolean) : [])
     }
     return data
@@ -101,9 +105,16 @@ const fetchProblemDetail = async (id: string) => {
 
 const addProblem = async (payload: CreateProblemPayload) => {
   try {
-    const { data } = await api.post<PhysicsProblem>('/addQuestions', payload)
+    // Convert tag array to string for backend
+    const processedPayload = {
+      ...payload,
+      tag: Array.isArray(payload.tag) ? payload.tag.join(',') : payload.tag
+    }
+    const { data } = await api.post<PhysicsProblem>('/addQuestions', processedPayload)
     if (data) {
-      (data as any).tag = Array.isArray((data as any).tag) ? (data as any).tag : (typeof (data as any).tag === 'string' ? (data as any).tag.split(',').map((s: string) => s.trim()).filter(Boolean) : [])
+      // Convert id to string and normalize tag to array
+      data.id = String((data as any).id)
+      data.tag = Array.isArray((data as any).tag) ? (data as any).tag : (typeof (data as any).tag === 'string' ? (data as any).tag.split(',').map((s: string) => s.trim()).filter(Boolean) : [])
       // Refresh the full list from backend to ensure frontend has the latest, canonical data
       await fetchProblems()
     }
@@ -117,20 +128,20 @@ const addProblem = async (payload: CreateProblemPayload) => {
 const updateProblem = async (id: string, updates: Partial<CreateProblemPayload>) => {
   try {
     const current = getProblemById(id)
-    const payload: UpdateProblemPayload = {
-      id,
+    const tagArray = updates.tag ?? current?.tag ?? []
+    const payload: any = {
+      id: Number(id),
       content: updates.content ?? current?.content ?? '',
       answer: updates.answer ?? current?.answer ?? '',
-      tag: updates.tag ?? current?.tag ?? []
+      tag: Array.isArray(tagArray) ? tagArray.join(',') : tagArray
     }
 
     const { data } = await api.post<PhysicsProblem>('/editQuestions', payload)
     if (data) {
       (data as any).tag = Array.isArray((data as any).tag) ? (data as any).tag : (typeof (data as any).tag === 'string' ? (data as any).tag.split(',').map((s: string) => s.trim()).filter(Boolean) : [])
+      // Refresh the full list from backend to ensure frontend has the latest, canonical data
+      await fetchProblems()
     }
-    problems.value = problems.value.map(problem =>
-      problem.id === id ? data : problem
-    )
     return data
   } catch (error) {
     console.error('编辑题目失败:', error)
@@ -148,7 +159,30 @@ const scoreProblem = async (payload: ScoreRequest) => {
   }
 }
 
+const askAI = async (question: string) => {
+  try {
+    const { data } = await api.post<ScoreResponse>('/questions/ask', {
+      question
+    })
+    return data
+  } catch (error) {
+    console.error('AI 问答失败:', error)
+    throw error
+  }
+}
+
 const getProblemById = (id: string) => problems.value.find(problem => problem.id === id)
+
+const deleteProblem = async (id: string) => {
+  try {
+    await api.post(`/deleteQuestions`, { id })
+    // Refresh the full list from backend to ensure frontend has the latest, canonical data
+    await fetchProblems()
+  } catch (error) {
+    console.error('删除题目失败:', error)
+    throw error
+  }
+}
 
 const ensureInitialized = () => {
   if (isInitialized || isFetching.value || typeof window === 'undefined') {
@@ -168,7 +202,9 @@ export const useProblemStore = () => {
     fetchProblemDetail,
     addProblem,
     updateProblem,
+    deleteProblem,
     scoreProblem,
+    askAI,
     getProblemById
   }
 }
