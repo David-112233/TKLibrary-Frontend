@@ -60,6 +60,8 @@
 import { ref, nextTick } from 'vue'
 import { useProblemStore } from '../stores/problemStore'
 import { marked } from 'marked'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
 
 const { askAI } = useProblemStore()
 
@@ -106,8 +108,53 @@ const sendMessage = async () => {
   }
 }
 
+// 渲染Markdown并处理数学公式
 const renderMarkdown = (content: string) => {
-  return marked(content)
+  if (typeof content !== 'string') {
+    console.error('renderMarkdown: content must be a string, got', typeof content)
+    return ''
+  }
+  
+  try {
+    // 1. 先在原始文本中处理Final Answer行，确保\boxed被正确识别
+    let processedContent = content.replace(/Final Answer:\\boxed\{([^}]+)\}/g, (_match, formula) => {
+      return `Final Answer: $\\boxed{${formula}}$`
+    })
+    
+    // 2. 同步渲染Markdown
+    let html = marked.parse(processedContent) as string
+    
+    // 3. 替换行内数学公式 $...$ 为KaTeX渲染结果，特别处理\boxed
+    html = html.replace(/\$(.*?)\$/g, (match: string, formula: string) => {
+      try {
+        return katex.renderToString(formula, {
+          throwOnError: false,
+          displayMode: false
+        })
+      } catch (e) {
+        console.error('行内公式渲染错误:', formula, e)
+        return match
+      }
+    })
+    
+    // 4. 替换块级数学公式 $$...$$ 为KaTeX渲染结果，特别处理\boxed
+    html = html.replace(/\$\$(.*?)\$\$/gs, (match: string, formula: string) => {
+      try {
+        return katex.renderToString(formula, {
+          throwOnError: false,
+          displayMode: true
+        })
+      } catch (e) {
+        console.error('块级公式渲染错误:', formula, e)
+        return match
+      }
+    })
+    
+    return html
+  } catch (e) {
+    console.error('renderMarkdown error:', e)
+    return content
+  }
 }
 </script>
 

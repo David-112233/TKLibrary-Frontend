@@ -48,7 +48,7 @@ const goAIChat = () => {
 }
 
 .nav-link {
-  background-color: transparent;
+  background-color: lightskyblue;
   border: none;
   color: var(--text-color);
   font-size: 1rem;
