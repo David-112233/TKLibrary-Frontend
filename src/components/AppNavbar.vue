@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar bg-white shadow-md">
     <div class="nav-container container mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="nav-title text-xl font-bold text-primary-color cursor-pointer transition-all hover:scale-105" @click="goHome">physics-bank 高中物理题典</h1>
+      <h1 class="nav-title text-xl font-bold text-primary-color cursor-pointer transition-all hover:scale-105" @click="goHome">TKLibrary QuestHub</h1>
       <div class="nav-links flex gap-3">
         <button class="nav-link rounded-md px-4 py-2 transition-all hover:bg-primary-light" @click="goHome">题目列表</button>
         <button class="nav-link rounded-md px-4 py-2 transition-all hover:bg-primary-light" @click="goAdd">添加题目</button>
