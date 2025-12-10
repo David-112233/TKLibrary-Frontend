@@ -116,6 +116,16 @@ p {
   background-color: var(--primary-hover);
 }
 
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
 .btn-secondary {
   background-color: var(--background-color);
   color: var(--text-color);

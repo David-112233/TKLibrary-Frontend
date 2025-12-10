@@ -32,19 +32,19 @@
   --tracking-widest: 0.1em;
 
   /* Colors - Brand */
-  --primary-color: #3b82f6;       /* Blue 500 */
-  --primary-hover: #2563eb;       /* Blue 600 */
-  --primary-active: #1d4ed8;      /* Blue 700 */
-  --primary-light: #eff6ff;       /* Blue 50 */
+  --primary-color: #004B87;       /* Deep Blue (主色) */
+  --primary-hover: #FFB71B;       /* Gold (悬停 / 强调) */
+  --primary-active: #0A2E5D;      /* Darker blue for active */
+  --primary-light: #ffffff;       /* Card / module background white */
   
   /* Colors - Neutrals */
-  --background-color: #f8fafc;    /* Slate 50 */
-  --surface-color: #ffffff;       /* White */
-  --text-main: #0f172a;           /* Slate 900 */
-  --text-secondary: #475569;      /* Slate 600 */
-  --text-muted: #94a3b8;          /* Slate 400 */
-  --border-color: #e2e8f0;        /* Slate 200 */
-  --divider-color: #f1f5f9;       /* Slate 100 */
+  --background-color: #f8fafc;    /* Page background (kept light) */
+  --surface-color: #ffffff;       /* Card / module background */
+  --text-main: #0b2437;           /* Deep slate / readable (near blue-black) */
+  --text-secondary: #2b4a6f;      /* Secondary text */
+  --text-muted: #6b7f93;          /* Muted */
+  --border-color: #0A2E5D;        /* Grey-blue (分割线 / 边框) */
+  --divider-color: #e6eef8;       /* light divider */
 
   /* Colors - Status */
   --success-color: #22c55e;       /* Green 500 */
@@ -58,15 +58,19 @@
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
   /* Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.5rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
 
   /* Animation */
   --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Footer */
+  --footer-bg: #0A2E5D; /* deep blue */
+  --footer-text: #ffffff;
 }
 
 /* Reset & Base Styles */

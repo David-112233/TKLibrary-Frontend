@@ -226,8 +226,14 @@ const handleDelete = async (id: string) => {
 
 .btn-delete:hover {
   background-color: #dc2626;
-  transform: translateY(-1px);
+  transform: scale(1.06);
   box-shadow: var(--shadow-md);
+  color: #ffffff !important;
+}
+
+.btn-delete:active {
+  transform: scale(1);
+  box-shadow: var(--shadow-sm);
 }
 
 .problem-title {
@@ -319,8 +325,17 @@ const handleDelete = async (id: string) => {
 }
 
 .btn-primary-white:hover {
-  background-color: #f3f4f6;
+  background-color: var(--divider-color);
   color: #4b5563;
+}
+.btn-primary-white:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-primary-white:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary {
@@ -360,6 +375,16 @@ const handleDelete = async (id: string) => {
 
 .btn-edit:hover {
   background-color: #d1d5db;
+}
+
+.btn-edit:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-edit:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 .flex {

@@ -51,13 +51,13 @@
             </div>
             
             <div class="action-bar">
-              <button
-                @click="submitAnswer"
-                :disabled="!userAnswer.trim() || submitting"
-                class="submit-button"
-              >
-                <span v-if="submitting" class="spinner-sm"></span>
-                {{ submitting ? '正在提交...' : '提交答案' }}
+                <button
+                  @click="submitAnswer"
+                  :disabled="!userAnswer.trim() || submitting"
+                  class="submit-button"
+                >
+                  <span v-if="submitting" class="spinner-sm"></span>
+                  {{ submitting ? '正在提交...' : '提交答案' }}
               </button>
             </div>
           </div>
@@ -110,9 +110,11 @@
       </div>
       
       <!-- 右侧：AI 侧边栏 -->
-      <div class="sidebar-wrapper">
-        <div class="sticky-sidebar">
-          <AiSidebar />
+       <div class="sidebar-wrapper">
+        <div class="sidebar-wrapper">
+          <div class="sticky-sidebar">
+            <AiSidebar />
+          </div>
         </div>
       </div>
     </div>
@@ -345,17 +347,19 @@ const goBack = () => {
   width: 100%;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 1rem;
+  padding: 0.75rem 1rem;      /* 调整内边距，更符合视觉对齐 */
   height: 16rem;
   font-size: var(--text-base);
-  line-height: var(--leading-relaxed);
+  line-height: 1.5;           /* 固定行高，避免浏览器计算偏差 */
   color: var(--text-main);
   resize: vertical;
   outline: none;
   transition: all 0.2s;
   font-family: inherit;
   background-color: var(--background-color);
+  box-sizing: border-box;     /* 关键：让 padding/border 不影响光标位置 */
 }
+
 
 .answer-textarea:focus {
   border-color: var(--primary-color);
@@ -369,32 +373,51 @@ const goBack = () => {
 }
 
 .submit-button {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: #2ECC71; /* 翠绿 */
+  color: #FFFFFF;
   padding: 0.75rem 2rem;
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
   font-weight: 500;
   font-size: var(--text-sm);
-  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
+  justify-content: center;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.12s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 99999;
+  will-change: transform;
 }
 
+/* 悬停效果：放大 + 深绿 */
 .submit-button:hover:not(:disabled) {
-  background-color: var(--primary-hover);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  background-color: #27AE60;
+  transform: scale(1.06);
+  box-shadow: var(--shadow-lg);
 }
 
+/* 点击效果：缩小 + 更深绿 */
+.submit-button:active:not(:disabled) {
+  background-color: #1E8449;
+  transform: scale(0.97);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 禁用状态 */
 .submit-button:disabled {
   background-color: var(--border-color);
   color: var(--text-light);
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
+  pointer-events: none;
+}
+
+.submit-button:focus {
+  outline: 3px solid rgba(46,204,113,0.25);
+  outline-offset: 2px;
 }
 
 .spinner-sm {
@@ -549,12 +572,32 @@ const goBack = () => {
   }
 }
 
+.sidebar-wrapper {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-wrapper {
+    width: 24rem;
+  }
+}
+
 .sticky-sidebar {
   position: sticky;
   top: 1.5rem;
-  height: calc(100vh - 3rem);
-  max-height: 800px;
+  height: calc(100vh - 3rem); /* 保持顶部间距 */
+  display: flex;
+  flex-direction: column;
 }
+
+.sidebar-scroll {
+  flex: 1;                /* 占满父元素高度 */
+  overflow-y: auto;       /* 内部滚动 */
+  padding-right: 0.5rem;  /* 避免滚动条覆盖内容 */
+  scrollbar-width: thin;  /* 火狐滚动条细一点 */
+}
+
 
 @keyframes spin {
   from { transform: rotate(0deg); }
